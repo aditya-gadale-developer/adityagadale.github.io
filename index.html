@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aditya Gadale — Java Full Stack Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B1220;
+    --ink-2:#101A33;
+    --ink-3:#0D1628;
+    --paper:#EDEEF0;
+    --paper-dim:#C7CBD6;
+    --slate:#8A93A6;
+    --amber:#E8A33D;
+    --teal:#5FBFA0;
+    --coral:#E2685A;
+    --line: rgba(237,238,240,0.09);
+    --line-strong: rgba(237,238,240,0.16);
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  ::selection{background:var(--amber); color:var(--ink);}
+
+  /* ---------- Tab bar / nav ---------- */
+  .tabbar{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:stretch;
+    background:var(--ink-3);
+    border-bottom:1px solid var(--line-strong);
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .tabbar::-webkit-scrollbar{display:none;}
+  .tabbar .brand{
+    display:flex; align-items:center; gap:8px;
+    padding:0 16px;
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--slate);
+    white-space:nowrap;
+    border-right:1px solid var(--line);
+  }
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);flex:none;}
+  .tab{
+    font-family:var(--mono);
+    font-size:13px;
+    background:transparent;
+    border:none;
+    border-right:1px solid var(--line);
+    color:var(--slate);
+    padding:13px 18px;
+    cursor:pointer;
+    white-space:nowrap;
+    display:flex; align-items:center; gap:8px;
+    position:relative;
+    transition:color .15s ease, background .15s ease;
+  }
+  .tab .mod{width:6px;height:6px;border-radius:50%;background:var(--coral);opacity:0;transition:opacity .15s;}
+  .tab:hover{color:var(--paper); background:rgba(237,238,240,0.03);}
+  .tab:focus-visible{outline:2px solid var(--amber); outline-offset:-2px;}
+  .tab.active{color:var(--paper); background:var(--ink);}
+  .tab.active .mod{opacity:1;}
+  .tab.active::after{
+    content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:var(--amber);
+  }
+
+  /* ---------- Layout shell ---------- */
+  main{max-width:900px; margin:0 auto; padding:0 24px;}
+  .panel{
+    padding:64px 0 56px;
+    border-bottom:1px solid var(--line);
+  }
+  .panel:last-of-type{border-bottom:none;}
+  .gutter-row{
+    display:grid;
+    grid-template-columns:40px 1fr;
+    column-gap:20px;
+  }
+  .ln{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:#3C4459;
+    text-align:right;
+    user-select:none;
+    padding-top:2px;
+  }
+  .filename{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--amber);
+    letter-spacing:0.02em;
+    margin:0 0 22px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .filename::before{content:'▸'; color:var(--slate); font-size:11px;}
+
+  /* ---------- Hero ---------- */
+  .hero{padding-top:56px;}
+  .terminal{
+    background:var(--ink-2);
+    border:1px solid var(--line-strong);
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 30px 60px -30px rgba(0,0,0,0.6);
+  }
+  .term-bar{
+    display:flex; align-items:center; gap:8px;
+    padding:12px 16px;
+    border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,0.015);
+  }
+  .term-bar span{width:11px;height:11px;border-radius:50%;display:inline-block;}
+  .term-bar .r{background:#E2685A;} .term-bar .y{background:#E8A33D;} .term-bar .g{background:#5FBFA0;}
+  .term-bar .path{margin-left:10px; font-family:var(--mono); font-size:12px; color:var(--slate);}
+  .term-body{padding:28px 24px 32px; font-family:var(--mono); font-size:15px;}
+  .term-body .kw{color:#7C9EF0;}
+  .term-body .prop{color:var(--teal);}
+  .term-body .str{color:var(--amber);}
+  .term-body .punc{color:var(--slate);}
+  #typed{white-space:pre-wrap; color:var(--paper);}
+  .cursor{display:inline-block; width:9px; height:1.1em; background:var(--amber); vertical-align:text-bottom; animation:blink 1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .status-line{margin-top:22px; display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:13px; color:var(--teal);}
+  .status-line .pulse{width:8px;height:8px;border-radius:50%;background:var(--teal); box-shadow:0 0 0 0 rgba(95,191,160,0.6); animation:pulse 2s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,191,160,0.5);}70%{box-shadow:0 0 0 8px rgba(95,191,160,0);}100%{box-shadow:0 0 0 0 rgba(95,191,160,0);}}
+
+  .hero-links{display:flex; flex-wrap:wrap; gap:12px; margin-top:26px;}
+  .btn{
+    font-family:var(--mono); font-size:13px;
+    padding:11px 18px; border-radius:6px;
+    border:1px solid var(--line-strong);
+    background:transparent; color:var(--paper);
+    text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:border-color .15s, background .15s, transform .15s;
+  }
+  .btn:hover{border-color:var(--amber); background:rgba(232,163,61,0.08); transform:translateY(-1px);}
+  .btn.primary{background:var(--amber); color:var(--ink); border-color:var(--amber); font-weight:600;}
+  .btn.primary:hover{background:#f0b25c;}
+  .btn:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+
+  /* ---------- About ---------- */
+  .comment{color:var(--slate); font-family:var(--mono); font-size:13px; margin-bottom:4px;}
+  .about-text{font-size:17px; color:var(--paper-dim); max-width:64ch;}
+  .about-text strong{color:var(--paper); font-weight:600;}
+
+  /* ---------- Skills ---------- */
+  .skills-grid{display:flex; flex-direction:column; gap:22px;}
+  .skill-row{display:grid; grid-template-columns:190px 1fr; gap:16px; align-items:baseline;}
+  .skill-key{font-family:var(--mono); font-size:13.5px; color:var(--teal);}
+  .skill-key .q{color:var(--slate);}
+  .chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    font-family:var(--mono); font-size:12.5px;
+    padding:5px 11px; border-radius:5px;
+    background:var(--ink-2); border:1px solid var(--line-strong);
+    color:var(--paper-dim);
+  }
+
+  /* ---------- Projects ---------- */
+  .project-card{
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:24px 26px;
+    margin-bottom:20px;
+  }
+  .project-card:last-child{margin-bottom:0;}
+  .project-head{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap;}
+  .project-name{font-family:var(--mono); font-size:15px; font-weight:600; color:var(--paper);}
+  .project-date{font-family:var(--mono); font-size:12px; color:var(--slate);}
+  .import-line{font-family:var(--mono); font-size:12px; color:var(--slate); margin:10px 0 16px;}
+  .import-line .kw{color:#7C9EF0;}
+  .import-line .mod{color:var(--coral);}
+  .project-card ul{margin:0; padding:0; list-style:none;}
+  .project-card li{
+    position:relative; padding-left:22px; margin-bottom:9px;
+    color:var(--paper-dim); font-size:14.5px;
+  }
+  .project-card li::before{content:'//'; position:absolute; left:0; color:#3C4459; font-family:var(--mono); font-size:13px;}
+
+  /* ---------- Experience / md ---------- */
+  .md-h{font-family:var(--sans); font-size:20px; font-weight:700; color:var(--paper); margin:0 0 4px;}
+  .md-h .h-mark{color:var(--amber); margin-right:8px; font-family:var(--mono);}
+  .md-sub{font-family:var(--mono); font-size:12.5px; color:var(--slate); margin-bottom:14px;}
+  .md-block{margin-bottom:38px;}
+  .md-block:last-child{margin-bottom:0;}
+  .md-list{margin:0; padding-left:0; list-style:none;}
+  .md-list li{position:relative; padding-left:20px; margin-bottom:8px; color:var(--paper-dim); font-size:15px;}
+  .md-list li::before{content:'-'; position:absolute; left:0; color:var(--teal);}
+  .cred-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px 24px;}
+  @media (max-width:640px){.cred-grid{grid-template-columns:1fr;}}
+  .cred-grid .cred{font-size:14px; color:var(--paper-dim); padding:8px 0; border-bottom:1px dashed var(--line);}
+  .cred-grid .cred .tag{color:var(--teal); font-family:var(--mono); font-size:11px; margin-right:8px;}
+
+  /* ---------- Contact ---------- */
+  .sh-line{font-family:var(--mono); font-size:14.5px; margin-bottom:6px;}
+  .sh-prompt{color:var(--teal);}
+  .sh-out{color:var(--paper-dim); margin:0 0 20px 20px;}
+  .sh-out a{color:var(--amber); text-decoration:none; border-bottom:1px solid transparent;}
+  .sh-out a:hover{border-bottom-color:var(--amber);}
+  .contact-actions{display:flex; flex-wrap:wrap; gap:12px; margin-top:28px;}
+
+  footer{
+    text-align:center; padding:32px 24px 48px;
+    font-family:var(--mono); font-size:12px; color:#3C4459;
+  }
+
+  @media (max-width:640px){
+    .gutter-row{grid-template-columns:26px 1fr; column-gap:12px;}
+    .panel{padding:48px 0 40px;}
+    .term-body{font-size:13.5px; padding:22px 18px 26px;}
+    .skill-row{grid-template-columns:1fr; gap:6px;}
+    .cred-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="tabbar" id="tabbar">
+  <div class="brand"><span class="dot"></span> aditya-gadale</div>
+  <button class="tab active" data-target="about">about<span class="mod"></span>.js</button>
+  <button class="tab" data-target="skills">skills<span class="mod"></span>.json</button>
+  <button class="tab" data-target="projects">projects<span class="mod"></span>/</button>
+  <button class="tab" data-target="experience">experience<span class="mod"></span>.md</button>
+  <button class="tab" data-target="contact">contact<span class="mod"></span>.sh</button>
+</nav>
+
+<main>
+
+  <!-- HERO / ABOUT -->
+  <section class="panel hero" id="about">
+    <div class="terminal">
+      <div class="term-bar">
+        <span class="r"></span><span class="y"></span><span class="g"></span>
+        <span class="path">~/aditya-gadale — about.js</span>
+      </div>
+      <div class="term-body">
+<span class="kw">const</span> developer <span class="punc">=</span> <span class="punc">{</span>
+  <span class="prop">name</span><span class="punc">:</span> <span class="str">"Aditya Gadale"</span><span class="punc">,</span>
+  <span class="prop">role</span><span class="punc">:</span> <span class="str">"Java Full Stack Developer"</span><span class="punc">,</span>
+  <span class="prop">based_in</span><span class="punc">:</span> <span class="str">"Baramati, Maharashtra"</span><span class="punc">,</span>
+  <span class="prop">graduating</span><span class="punc">:</span> <span class="str">"2026"</span><span class="punc">,</span>
+<span id="typed"></span><span class="cursor" id="cursor"></span>
+      </div>
+    </div>
+    <div class="status-line"><span class="pulse"></span> status: open to new-grad &amp; full stack developer roles</div>
+    <div class="hero-links">
+      <a class="btn primary" href="mailto:adityagadale2004@gmail.com">Email me</a>
+      <a class="btn" href="https://linkedin.com/in/aditya-gadale-a6b050318" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a class="btn" href="https://github.com/aditya-gadale-developer" target="_blank" rel="noopener">GitHub ↗</a>
+      <a class="btn" href="Aditya_Gadale_Resume.pdf" target="_blank" rel="noopener">Download résumé</a>
+    </div>
+
+    <div class="gutter-row" style="margin-top:56px;">
+      <div class="ln">01<br>02</div>
+      <div>
+        <p class="filename">about.js</p>
+        <p class="comment">/** professional summary **/</p>
+        <p class="about-text">I build web applications end to end — from <strong>MySQL</strong> schemas and <strong>JDBC</strong> data layers up through <strong>REST APIs</strong> and <strong>React</strong> interfaces. My final year has been spent turning coursework into working software: a Django complaint-management system with role-based access, and a Java desktop app for parking and billing built on clean MVC architecture. I like code that's easy to read six months later, and I'm looking for a team where I can keep shipping things like that.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="panel" id="skills">
+    <div class="gutter-row">
+      <div class="ln">01</div>
+      <div><p class="filename">skills.json</p></div>
+    </div>
+    <div class="gutter-row">
+      <div class="ln">02<br>03<br>04<br>05<br>06<br>07</div>
+      <div class="skills-grid">
+        <div class="skill-row">
+          <div class="skill-key"><span class="q">"</span>languages<span class="q">"</span>:</div>
+          <div class="chip-row"><span class="chip">Java</span><span class="chip">Python</span></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-key"><span class="q">"</span>frontend<span class="q">"</span>:</div>
+          <div class="chip-row"><span class="chip">HTML5</span><span class="chip">CSS3</span><span class="chip">JavaScript (ES6)</span><span class="chip">React.js</span><span class="chip">Responsive Design</span></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-key"><span class="q">"</span>backend<span class="q">"</span>:</div>
+          <div class="chip-row"><span class="chip">JDBC</span><span class="chip">RESTful APIs</span><span class="chip">Django</span></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-key"><span class="q">"</span>databases<span class="q">"</span>:</div>
+          <div class="chip-row"><span class="chip">SQL</span><span class="chip">MySQL</span><span class="chip">CRUD</span><span class="chip">Joins</span><span class="chip">Constraints</span></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-key"><span class="q">"</span>core_concepts<span class="q">"</span>:</div>
+          <div class="chip-row"><span class="chip">OOP</span><span class="chip">MVC</span><span class="chip">Client–Server Architecture</span><span class="chip">SDLC</span></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-key"><span class="q">"</span>tooling<span class="q">"</span>:</div>
+          <div class="chip-row"><span class="chip">VS Code</span><span class="chip">Git</span><span class="chip">GitHub</span><span class="chip">Postman</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="panel" id="projects">
+    <p class="filename">projects/</p>
+
+    <div class="project-card">
+      <div class="project-head">
+        <span class="project-name">OnlineComplaintManagementSystem</span>
+        <span class="project-date">Jan 2026 – Apr 2026</span>
+      </div>
+      <div class="import-line"><span class="kw">import</span> <span class="mod">{ Django, FirebaseAuth, RestAPIs, MVC }</span></div>
+      <ul>
+        <li>Backend-driven web app using Django with Firebase Authentication for secure user management</li>
+        <li>MVC architecture and RESTful APIs for a scalable, modular design</li>
+        <li>Role-based access control (RBAC) and ORM-based database design for complaint records and permissions</li>
+      </ul>
+    </div>
+
+    <div class="project-card">
+      <div class="project-head">
+        <span class="project-name">ParkingManagementSystem</span>
+        <span class="project-date">Oct 2025 – Dec 2025</span>
+      </div>
+      <div class="import-line"><span class="kw">import</span> <span class="mod">{ Java, JDBC, MySQL, OOP, MVC }</span></div>
+      <ul>
+        <li>Java desktop application built with OOP principles and MVC architecture</li>
+        <li>JDBC integration with MySQL to manage vehicle records and parking slot allocation</li>
+        <li>End-to-end billing operations handled through CRUD workflows</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE / EDUCATION / CERTS -->
+  <section class="panel" id="experience">
+    <p class="filename">experience.md</p>
+
+    <div class="md-block">
+      <h3 class="md-h"><span class="h-mark">##</span>Internship</h3>
+      <p class="md-sub">Microcare Computer Systems · Dec 2024 – Feb 2025</p>
+      <ul class="md-list">
+        <li>Completed a 6-week industry training and internship program</li>
+        <li>Performed data preprocessing and analysis using Python through practical assignments</li>
+      </ul>
+    </div>
+
+    <div class="md-block">
+      <h3 class="md-h"><span class="h-mark">##</span>Education</h3>
+      <ul class="md-list">
+        <li><strong style="color:var(--paper)">B.E., Information Technology</strong> — Shivnagar Vidyaprasarak Mandal's College of Engineering, Baramati · Final Year, SGPA 9.32</li>
+        <li>HSC — Tuljaram Chaturchand College, Baramati · 60% · 2022</li>
+        <li>SSC — Chhatrapati Shivaji High School, Vaduj · 85.4% · 2020</li>
+      </ul>
+    </div>
+
+    <div class="md-block">
+      <h3 class="md-h"><span class="h-mark">##</span>Achievements</h3>
+      <ul class="md-list">
+        <li>Participant, Inter-University Research Project Competition (AVISHKAR 2025)</li>
+        <li>Participant, National Level Project Competition (CRETECHNOVA 2K26)</li>
+        <li>Secured an SGPA of 9.32 in B.E. Information Technology</li>
+      </ul>
+    </div>
+
+    <div class="md-block">
+      <h3 class="md-h"><span class="h-mark">##</span>Certifications</h3>
+      <div class="cred-grid">
+        <div class="cred"><span class="tag">01</span>Java Programming</div>
+        <div class="cred"><span class="tag">02</span>AWS Solutions Architect</div>
+        <div class="cred"><span class="tag">03</span>Goldman Sachs Software Engineering</div>
+        <div class="cred"><span class="tag">04</span>Accenture Developer Program</div>
+        <div class="cred"><span class="tag">05</span>Accenture Advanced Coding</div>
+        <div class="cred"><span class="tag">06</span>BCG Generative AI</div>
+        <div class="cred"><span class="tag">07</span>Accenture Project Management</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="panel" id="contact" style="border-bottom:none;">
+    <p class="filename">contact.sh</p>
+
+    <p class="sh-line"><span class="sh-prompt">$</span> echo $EMAIL</p>
+    <p class="sh-out"><a href="mailto:adityagadale2004@gmail.com">adityagadale2004@gmail.com</a></p>
+
+    <p class="sh-line"><span class="sh-prompt">$</span> echo $PHONE</p>
+    <p class="sh-out"><a href="tel:+918237736779">+91 8237736779</a></p>
+
+    <p class="sh-line"><span class="sh-prompt">$</span> cat social_links.txt</p>
+    <p class="sh-out">
+      LinkedIn → <a href="https://linkedin.com/in/aditya-gadale-a6b050318" target="_blank" rel="noopener">linkedin.com/in/aditya-gadale-a6b050318</a><br>
+      GitHub → <a href="https://github.com/aditya-gadale-developer" target="_blank" rel="noopener">github.com/aditya-gadale-developer</a>
+    </p>
+
+    <p class="sh-line"><span class="sh-prompt">$</span> whereis --location</p>
+    <p class="sh-out">Baramati, Maharashtra, India</p>
+
+    <div class="contact-actions">
+      <a class="btn primary" href="mailto:adityagadale2004@gmail.com">Say hello</a>
+      <a class="btn" href="Aditya_Gadale_Resume.pdf" target="_blank" rel="noopener">Download résumé</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>// built &amp; compiled without errors</footer>
+
+<script>
+  // Typewriter for the closing hero lines (respects reduced-motion)
+  (function(){
+    const target = document.getElementById('typed');
+    const cursor = document.getElementById('cursor');
+    const lines = [
+      '  status: "compiling ambition into code"',
+      '};'
+    ];
+    const full = lines.join('\n');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce){ target.textContent = full; return; }
+    let i = 0;
+    function tick(){
+      if(i <= full.length){
+        target.textContent = full.slice(0, i);
+        i++;
+        setTimeout(tick, 18);
+      } else {
+        cursor.style.animation = 'blink 1s steps(1) infinite';
+      }
+    }
+    tick();
+  })();
+
+  // Tab bar: click-to-scroll + scroll-spy active state
+  (function(){
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const sections = tabs.map(t => document.getElementById(t.dataset.target));
+
+    tabs.forEach((tab, idx) => {
+      tab.addEventListener('click', () => {
+        sections[idx].scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+      });
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          const idx = sections.indexOf(entry.target);
+          tabs.forEach(t => t.classList.remove('active'));
+          if(idx > -1) tabs[idx].classList.add('active');
+        }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+
+    sections.forEach(s => s && observer.observe(s));
+  })();
+</script>
+
+</body>
+</html>
